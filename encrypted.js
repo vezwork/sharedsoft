@@ -1,9 +1,6 @@
 // end-to-end encryption in the browser reference:
 // https://plus.excalidraw.com/blog/end-to-end-encryption
 
-// TODO: use the iv properly!!!! We reuse the key so we have to make
-// new ivs!
-
 const createKey = async () => {
   const key = await window.crypto.subtle.generateKey(
     { name: "AES-GCM", length: 128 },
@@ -47,10 +44,13 @@ function str2ab(str) {
   return buf;
 }
 const decrypt = async (key, encrypted) => {
+  const combinedPayload = str2ab(encrypted);
+  const iv = combinedPayload.slice(0, 12);
+  const ciphertext = combinedPayload.slice(12);
   const decrypted = await crypto.subtle.decrypt(
-    { name: "AES-GCM", iv: new Uint8Array(12) },
+    { name: "AES-GCM", iv },
     key,
-    str2ab(encrypted)
+    ciphertext
   );
   const decoded = new TextDecoder().decode(new Uint8Array(decrypted));
   return JSON.parse(decoded);
@@ -68,13 +68,18 @@ ws.addEventListener("error", (e) => {
 
 export const send = async (message) => {
   if (ws.readyState === ws.OPEN) {
+    const iv = crypto.getRandomValues(new Uint8Array(12));
     const aenc = await window.crypto.subtle.encrypt(
-      { name: "AES-GCM", iv: new Uint8Array(12) /* don't reuse key! */ },
+      { name: "AES-GCM", iv },
       key,
       new TextEncoder().encode(JSON.stringify(message))
     );
+    const ciphertext = new Uint8Array(aenc);
+    const combinedPayload = new Uint8Array(iv.length + ciphertext.length);
+    combinedPayload.set(iv, 0);
+    combinedPayload.set(ciphertext, iv.length);
 
-    const encrypted = ab2str(aenc);
+    const encrypted = ab2str(combinedPayload);
     ws.send(encrypted);
   }
 };
