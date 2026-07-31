@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "node-localstorage": "^3.0.5",
+    "ws": "^8.21.1"
+  },
+  "scripts": {
+    "client": "npx http-server",
+    "peer": "node -r node-localstorage/register messaging.js",
+    "relay": "node server.js"
+  },
+  "type": "module"
+}
