@@ -1,0 +1,97 @@
+// end-to-end encryption in the browser reference:
+// https://plus.excalidraw.com/blog/end-to-end-encryption
+
+// TODO: use the iv properly!!!! We reuse the key so we have to make
+// new ivs!
+
+const createKey = async () => {
+  const key = await window.crypto.subtle.generateKey(
+    { name: "AES-GCM", length: 128 },
+    true, // extractable
+    ["encrypt", "decrypt"]
+  );
+  const objectKey = (await window.crypto.subtle.exportKey("jwk", key)).k;
+  window.location.hash = `key=${objectKey}`;
+  return { key, objectKey };
+};
+
+const importKey = async () => {
+  try {
+    const objectKey = window.location.hash.slice("#key=".length);
+    const key = await window.crypto.subtle.importKey(
+      "jwk",
+      {
+        k: objectKey,
+        alg: "A128GCM",
+        ext: true,
+        key_ops: ["encrypt", "decrypt"],
+        kty: "oct",
+      },
+      { name: "AES-GCM", length: 128 },
+      false, // extractable
+      ["encrypt", "decrypt"]
+    );
+    return { objectKey, key };
+  } catch (e) {}
+};
+
+function ab2str(buf) {
+  return String.fromCharCode.apply(null, new Uint8Array(buf));
+}
+function str2ab(str) {
+  var buf = new ArrayBuffer(str.length); // 2 bytes for each char
+  var bufView = new Uint8Array(buf);
+  for (var i = 0, strLen = str.length; i < strLen; i++) {
+    bufView[i] = str.charCodeAt(i);
+  }
+  return buf;
+}
+const decrypt = async (key, encrypted) => {
+  const decrypted = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: new Uint8Array(12) },
+    key,
+    str2ab(encrypted)
+  );
+  const decoded = new TextDecoder().decode(new Uint8Array(decrypted));
+  return JSON.parse(decoded);
+};
+
+const { objectKey, key } = (await importKey()) ?? createKey();
+
+const ws = new WebSocket("wss://relay.bonto.run");
+ws.addEventListener("close", (e) => {
+  console.log("WEBSOCKET CLOSED!");
+});
+ws.addEventListener("error", (e) => {
+  console.log("WEBSOCKET ERROR!");
+});
+
+export const send = async (message) => {
+  if (ws.readyState === ws.OPEN) {
+    const aenc = await window.crypto.subtle.encrypt(
+      { name: "AES-GCM", iv: new Uint8Array(12) /* don't reuse key! */ },
+      key,
+      new TextEncoder().encode(JSON.stringify(message))
+    );
+
+    const encrypted = ab2str(aenc);
+    ws.send(encrypted);
+  }
+};
+
+const listeners = [];
+export const onReceive = (f) => {
+  listeners.push(f);
+};
+const connectListeners = [];
+export const onConnect = (f) => {
+  connectListeners.push(f);
+};
+
+ws.addEventListener("open", (e) => {
+  connectListeners.forEach((f) => f());
+});
+ws.addEventListener("message", async (e) => {
+  const decoded = await decrypt(key, e.data);
+  listeners.forEach((f) => f(decoded));
+});

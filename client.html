@@ -53,9 +53,9 @@
         (acc,{amount, split, who})=> acc + amount*split*(who===whoEl.value?-1:1),
         0
     )
-    messagesEl.innerHTML = state.expenses.reverse().map(({name,amount,split,who})=>
+    messagesEl.innerHTML = state.expenses.reverse().map(({name,amount,currency,date,split,who})=>
         `<div style="border:1px solid black">
-        ${who} - ${name} - <span style="color:blue">$ ${amount}</span> - ${split}
+        ${who} payed ${amount}${currency} for ${name} on ${date} and is owed ${split}× that amount
         </div>`
     ).join('') + `I owe <span style="color:${owing>0?'red':'green'}">$ ${owing.toFixed(2)}</span>`
   };

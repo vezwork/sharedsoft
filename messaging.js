@@ -1,3 +1,5 @@
+import { send as esend, onReceive as onRec, onConnect } from "./encrypted.js";
+
 const initOrLoad = (key, initValue) => {
   const item = localStorage.getItem(key);
   if (item !== null) return JSON.parse(item);
@@ -9,8 +11,6 @@ const objectValueMap = (arg, fn) =>
   Object.fromEntries(
     Object.entries(arg).map(([key, value]) => [key, fn(value, key)])
   );
-
-export const ws = new WebSocket("http://192.168.0.126:8088");
 
 export const id = initOrLoad("id", crypto.randomUUID());
 let head = initOrLoad("head", 0);
@@ -32,7 +32,7 @@ export const send = (message) => {
       time: getEpochMs(),
     },
   };
-  if (ws.readyState === ws.OPEN) ws.send(JSON.stringify(data));
+  esend(data);
   receive(data.data);
 };
 
@@ -41,15 +41,11 @@ export const onReceive = (f) => {
   listeners.push(f);
 };
 
-const update = () => {
-  if (ws.readyState === ws.OPEN)
-    ws.send(
-      JSON.stringify({
-        type: "updateRequest",
-        heads: heads(),
-      })
-    );
-};
+const update = () =>
+  esend({
+    type: "updateRequest",
+    heads: heads(),
+  });
 
 const receive = (data) => {
   const messagesFromId = messagesFromIds[data.id];
@@ -71,58 +67,43 @@ const receive = (data) => {
   listeners.forEach((f) => f());
 };
 
-ws.addEventListener("close", (e) => {
-  console.log("WEBSOCKET CLOSED!");
-});
-ws.addEventListener("error", (e) => {
-  console.log("WEBSOCKET ERROR!");
-});
-ws.addEventListener("open", (e) => {
-  ws.addEventListener("message", (e) => {
-    const message = JSON.parse(e.data);
-
-    if (message.type === "updateResponse") {
-      message.messages.forEach(receive);
-    }
-
-    if (message.type === "updateSingleIdRequest") {
-      ws.send(
-        JSON.stringify({
-          type: "updateResponse",
-          id: message.id,
-          messages: messagesFromIds[message.id].slice(message.head ?? 0),
-        })
-      );
-    }
-
-    if (message.type === "updateRequest") {
-      const myHeads = heads();
-      objectValueMap(myHeads, (myHead, id) => {
-        if (message.heads[id] === undefined || myHead > message.heads[id]) {
-          ws.send(
-            JSON.stringify({
-              type: "updateResponse",
-              id,
-              messages: messagesFromIds[id].slice(message.heads[id]),
-            })
-          );
-        }
-        if (myHeads[id] === undefined || message.heads[id] > myHead) {
-          ws.send(
-            JSON.stringify({
-              type: "updateSingleIdRequest",
-              id,
-              head: myHeads[id],
-            })
-          );
-        }
-      });
-    }
-
-    if (message.type === "message") {
-      receive(message.data);
-    }
-  });
-
+onConnect(() => {
   update();
+});
+onRec((message) => {
+  if (message.type === "updateResponse") {
+    message.messages.forEach(receive);
+  }
+
+  if (message.type === "updateSingleIdRequest") {
+    esend({
+      type: "updateResponse",
+      id: message.id,
+      messages: messagesFromIds[message.id].slice(message.head ?? 0),
+    });
+  }
+
+  if (message.type === "updateRequest") {
+    const myHeads = heads();
+    objectValueMap(myHeads, (myHead, id) => {
+      if (message.heads[id] === undefined || myHead > message.heads[id]) {
+        esend({
+          type: "updateResponse",
+          id,
+          messages: messagesFromIds[id].slice(message.heads[id]),
+        });
+      }
+      if (myHeads[id] === undefined || message.heads[id] > myHead) {
+        esend({
+          type: "updateSingleIdRequest",
+          id,
+          head: myHeads[id],
+        });
+      }
+    });
+  }
+
+  if (message.type === "message") {
+    receive(message.data);
+  }
 });
