@@ -10,7 +10,7 @@ const objectValueMap = (arg, fn) =>
     Object.entries(arg).map(([key, value]) => [key, fn(value, key)])
   );
 
-export const ws = new WebSocket("http://localhost:8088");
+export const ws = new WebSocket("http://192.168.0.126:8088");
 
 export const id = initOrLoad("id", crypto.randomUUID());
 let head = initOrLoad("head", 0);
