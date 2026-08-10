@@ -59,11 +59,14 @@ const decrypt = async (key, encrypted) => {
 const { objectKey, key } = (await importKey()) ?? createKey();
 
 const ws = new WebSocket("wss://relay.bonto.run");
+ws.addEventListener("open", (e) => {
+  document.body.append("WEBSOCKET OPENED!");
+});
 ws.addEventListener("close", (e) => {
-  console.log("WEBSOCKET CLOSED!");
+  document.body.append("WEBSOCKET CLOSED!");
 });
 ws.addEventListener("error", (e) => {
-  console.log("WEBSOCKET ERROR!");
+  document.body.append("WEBSOCKET ERROR!");
 });
 
 export const send = async (message) => {

@@ -1,0 +1,13 @@
+{
+  "name": "sharedsoft",
+  "start_url": "/",
+  "display": "standalone",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "./icon.png",
+      "type": "image/png",
+      "sizes": "256x256"
+    }
+  ]
+}
