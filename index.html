@@ -1,6 +1,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json" />
 <style>
+  :root {
+    color-scheme: light dark; /* Automatically supports OS dark/light mode */
+  }
   html, body {
     font-family: system-ui;
   }
@@ -13,7 +16,7 @@ TODO:<br>
   - see if it returns true<br>
 - super basic service worker registration for offline support
 
-<div style="display:flex; flex-direction: column;border:1px solid black; padding: 10px; gap: 5px; margin: 10px;">
+<div style="display:flex; flex-direction: column;border:1px solid light-dark(#000, #fff); padding: 10px; gap: 5px; margin: 10px;">
     <select id="categoryEl">
         <option value="dining out">dining out</option>
         <option value="grocery">grocery</option>
@@ -44,10 +47,9 @@ TODO:<br>
         and is owed
         <input type="text" value="0.5" id="splitEl" size="4">× that amount
     </span>
-    <label>portion owed: </label>
     <button id="addEl">add expense</button>
 </div>
-<div style="display:flex; flex-direction: column;border:1px solid black; padding: 10px; gap: 5px; margin: 10px;" id="messagesEl"></div>
+<div style="display:flex; flex-direction: column;border:1px solid light-dark(#000, #fff); padding: 10px; gap: 5px; margin: 10px;" id="messagesEl"></div>
 <script type="module">
   import { onEvent, sendEvent, id } from "./events.js";
 
@@ -69,10 +71,10 @@ TODO:<br>
         0
     )
     messagesEl.innerHTML = state.expenses.reverse().map(({name,amount,currency,date,split,who})=>
-        `<div style="border:1px solid black">
+        `<div style="border:1px solid light-dark(#000, #fff)">
         ${who} payed ${amount}${currency} for ${name} on ${date} and is owed ${split}× that amount
         </div>`
-    ).join('') + `I owe <span style="color:${owing>0?'red':'green'}">$ ${owing.toFixed(2)}</span>`
+    ).join('') + `I owe <span style="color:${owing>0?'red':'LimeGreen'}">$ ${owing.toFixed(2)}</span>`
   };
 
   // TODO:
