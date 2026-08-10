@@ -1,6 +1,6 @@
 {
   "name": "sharedsoft",
-  "start_url": "/",
+  "start_url": "https://vezwork.github.io/sharedsoft/",
   "display": "standalone",
   "prefer_related_applications": false,
   "icons": [
