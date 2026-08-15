@@ -32,7 +32,7 @@ const importKey = async () => {
       ["encrypt", "decrypt"]
     );
     return { objectKey, key };
-  } catch (e) {}
+  } catch (e) { }
 };
 
 function ab2str(buf) {
