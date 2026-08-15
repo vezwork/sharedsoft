@@ -81,13 +81,20 @@ before init'ing connection
       (acc, { amount, split, who }) => acc + amount * split * (who === whoEl.value ? -1 : 1),
       0
     )
-    const iOwe = owing > 0;
-    const oweText = iOwe ? "owe" : "am owed";
+
+    let oweanceString;
+    if (owing === 0) {
+      oweanceString = `<span style="color:LimeGreen">Settled up! :)</span>`;
+    } else {
+      const iOwe = owing > 0;
+      oweanceString = `I ${iOwe ? "owe" : "am owed"} <span style="color:${iOwe ? 'red' : 'LimeGreen'}">$ ${Math.abs(owing).toFixed(2)}</span>`;
+    }
+
     messagesEl.innerHTML = state.expenses.reverse().map(({ name, amount, currency, date, split, who }) =>
       `<div style="border:1px solid light-dark(#000, #fff)">
         ${who} paid ${amount}${currency} for ${name} on ${date} and is owed ${split}× that amount
         </div>`
-    ).join('') + `I ${oweText} <span style="color:${iOwe ? 'red' : 'LimeGreen'}">$ ${Math.abs(owing).toFixed(2)}</span>`
+    ).join('') + oweanceString;
   };
 
   // TODO:
