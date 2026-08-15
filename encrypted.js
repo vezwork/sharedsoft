@@ -9,12 +9,14 @@ const createKey = async () => {
   );
   const objectKey = (await window.crypto.subtle.exportKey("jwk", key)).k;
   window.location.hash = `key=${objectKey}`;
+  localStorage.setItem("key", objectKey);
   return { key, objectKey };
 };
 
 const importKey = async () => {
   try {
-    const objectKey = window.location.hash.slice("#key=".length);
+    const objectKey =
+      localStorage.getItem("key") ?? window.location.hash.slice("#key=".length);
     const key = await window.crypto.subtle.importKey(
       "jwk",
       {
@@ -55,6 +57,20 @@ const decrypt = async (key, encrypted) => {
   const decoded = new TextDecoder().decode(new Uint8Array(decrypted));
   return JSON.parse(decoded);
 };
+const encrypt = async (key, message) => {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const aenc = await window.crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    new TextEncoder().encode(JSON.stringify(message))
+  );
+  const ciphertext = new Uint8Array(aenc);
+  const combinedPayload = new Uint8Array(iv.length + ciphertext.length);
+  combinedPayload.set(iv, 0);
+  combinedPayload.set(ciphertext, iv.length);
+
+  return ab2str(combinedPayload);
+};
 
 const { objectKey, key } = (await importKey()) ?? createKey();
 
@@ -71,19 +87,7 @@ ws.addEventListener("error", (e) => {
 
 export const send = async (message) => {
   if (ws.readyState === ws.OPEN) {
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const aenc = await window.crypto.subtle.encrypt(
-      { name: "AES-GCM", iv },
-      key,
-      new TextEncoder().encode(JSON.stringify(message))
-    );
-    const ciphertext = new Uint8Array(aenc);
-    const combinedPayload = new Uint8Array(iv.length + ciphertext.length);
-    combinedPayload.set(iv, 0);
-    combinedPayload.set(ciphertext, iv.length);
-
-    const encrypted = ab2str(combinedPayload);
-    ws.send(encrypted);
+    ws.send(await encrypt(key, message));
   }
 };
 
