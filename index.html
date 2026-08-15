@@ -38,7 +38,7 @@ before init'ing connection
       whoEl.value = localStorage.getItem('who')
       whoEl.addEventListener('change', e => localStorage.setItem('who', whoEl.value))
     </script>
-    payed
+    paid
     <input type="number" id="amountEl" style="width: 80px"></input>
     <input type="text" value="CAD" id="currencyEl" size="4" />
   </span>
@@ -82,7 +82,7 @@ before init'ing connection
     )
     messagesEl.innerHTML = state.expenses.reverse().map(({ name, amount, currency, date, split, who }) =>
       `<div style="border:1px solid light-dark(#000, #fff)">
-        ${who} payed ${amount}${currency} for ${name} on ${date} and is owed ${split}× that amount
+        ${who} paid ${amount}${currency} for ${name} on ${date} and is owed ${split}× that amount
         </div>`
     ).join('') + `I owe <span style="color:${owing > 0 ? 'red' : 'LimeGreen'}">$ ${owing.toFixed(2)}</span>`
   };
