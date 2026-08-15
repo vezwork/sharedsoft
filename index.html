@@ -12,8 +12,10 @@
 TODO:<br>
 - store key so installed app can access it without it being in the url
 - add categories from splitwise
+- add UI for "owed", "owing"
 - add basic validation
 - make UI reactive (user -> owing, connection state, last sync time)
+- add refresh button
 - wait for reply from `fetch('https://relay.bonto.run')` 
   before init'ing connection
 - super basic service worker registration for offline support
@@ -114,4 +116,13 @@ if (navigator.storage && navigator.storage.persist) {
 
 <script>
   fetch('https://relay.bonto.run', {mode: "no-cors"})
+</script>
+
+<input type="text" id="keyEl" size="40"/>
+<script>
+  console.log(localStorage.getItem('key'))
+keyEl.value = localStorage.getItem('key')
+keyEl.addEventListener('change',e=>{
+  localStorage.setItem('key', keyEl.value)
+})
 </script>

@@ -17,6 +17,7 @@ const importKey = async () => {
   try {
     const objectKey =
       localStorage.getItem("key") ?? window.location.hash.slice("#key=".length);
+    localStorage.setItem("key", objectKey);
     const key = await window.crypto.subtle.importKey(
       "jwk",
       {
