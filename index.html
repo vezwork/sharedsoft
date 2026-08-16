@@ -44,24 +44,6 @@
       <br>
       <button commandfor="profile-dialog" command="close">Close</button>
   </dialog>
-  <script>
-    const profileSrc = () => {
-      const profileVal = profileEl.value.toLowerCase();
-      switch (profileVal) {
-        case 'elliot':
-          return 'elliot.png';
-        case 'sharon':
-          return 'sharon.png';
-        default:
-          return 'whodis.png'
-      }
-    }
-    profilePic.src = profileSrc();
-    profileEl.addEventListener('change', e => {
-      localStorage.setItem('who', profileEl.value)
-      profilePic.src = profileSrc();
-    })
-  </script>
 </div>
 
 <div style="display:none; padding: 10px; gap: 5px; margin: 10px;" id="refreshEl">
@@ -187,7 +169,24 @@
   id="messagesEl"></div>
 
 <script type="module">
-  import { onEvent, sendEvent, id } from "./events.js";
+  import { onEvent, sendEvent, id, manualUpdate } from "./events.js";
+
+  const profileSrc = () => {
+    switch (profileEl.value) {
+      case 'elliot':
+        return 'elliot.png';
+      case 'sharon':
+        return 'sharon.png';
+      default:
+        return 'whodis.png'
+    }
+  }
+  profilePic.src = profileSrc();
+  profileEl.addEventListener('change', e => {
+    localStorage.setItem('who', profileEl.value)
+    profilePic.src = profileSrc();
+    manualUpdate();
+  })
 
   let state = {
     expenses: [],
@@ -212,7 +211,7 @@
     }
     const owing = {}
     for (const { amount, split, who, currency } of state.expenses) {
-      owing[currency] = (owing[currency] ?? 0) + amount / split * (who === whoEl.value ? -1 : 1)
+      owing[currency] = (owing[currency] ?? 0) + amount / split * (who === profileEl.value ? -1 : 1)
     }
 
     console.log(owing)
@@ -225,8 +224,13 @@
     } else {
       for (const [currency, amt] of Object.entries(owing)) {
         if (Math.abs(amt) <= 0.01) continue;
-        const iOwe = amt > 0;
-        oweanceString += `<div>I ${iOwe ? "owe" : "am owed"}: <span style="color:${iOwe ? 'red' : 'LimeGreen'}">${Math.abs(amt).toFixed(2)} ${currency}</span></div>`;
+        const oweanceAmount = `${Math.abs(amt).toFixed(2)} ${currency}`;
+        if (!profileEl.value) {
+          oweanceString += `<div><span style="color:yellow">${oweanceAmount}</span> is owed. Please <button command="show-modal" commandfor="profile-dialog" style="cursor: pointer;">set your profile</button>!</div>`;
+        } else {
+          const iOwe = amt > 0;
+          oweanceString += `<div>I ${iOwe ? "owe" : "am owed"}: <span style="color:${iOwe ? 'red' : 'LimeGreen'}">${oweanceAmount}</span></div>`;
+        }
       }
 
     }
