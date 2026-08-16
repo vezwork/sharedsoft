@@ -149,14 +149,18 @@
   </span>
   <span>
     paid by:
-    <select id="whoEl">
+    <select id="paidByEl">
       <option value="elliot">Elliot</option>
       <option value="sharon">Sharon</option>
     </select>
     who is owed
     1÷<input type="number" value="2" id="splitEl" size="4"> that amount
     <script>
-      whoEl.value = localStorage.getItem('who')
+      // Only set the initial paid by if the profile is set. Otherwise let it default to the first value automatically
+      const initialWho = localStorage.getItem('who');
+      if (initialWho) {
+        paidByEl.value = initialWho;
+      }
     </script>
   </span>
   <button id="addEl">add expense</button>
@@ -186,6 +190,9 @@
     localStorage.setItem('who', profileEl.value)
     profilePic.src = profileSrc();
     manualUpdate();
+    if (profileEl.value) {
+      paidByEl.value = profileEl.value;
+    }
   })
 
   let state = {
@@ -299,7 +306,7 @@
 
   addEl.onclick = () => {
     const expenseData = {
-      who: whoEl.value?.trim(),
+      who: paidByEl.value?.trim(),
       amount: Number(amountEl.value?.trim()),
       currency: currencyEl.value?.trim(),
       category: categoryEl.value?.trim(),
