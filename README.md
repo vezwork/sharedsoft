@@ -20,7 +20,5 @@
 - revive "peer" node.js client (mostly requires passing an encryption key to the
   script)
 - super basic service worker registration for offline support
-- sum things up properly if different currencies are used
-- decouple payer from the "I am owed" text
 - make expense log better; group by month and make each transaction more
   visually parseable
