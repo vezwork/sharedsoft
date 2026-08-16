@@ -20,7 +20,7 @@ export const messagesFromIds = initOrLoad("messagesFromIds", {});
 const heads = () => objectValueMap(messagesFromIds, (msgs) => msgs.at(-1).head);
 
 const getEpochMs = () => new Date().getTime();
-export const send = (message) => {
+export const send = (message, dontNetwork) => {
   head++;
   localStorage.setItem("head", JSON.stringify(head));
   const data = {
@@ -32,8 +32,8 @@ export const send = (message) => {
       time: getEpochMs(),
     },
   };
-  esend(data);
-  receive(data.data);
+  if (!dontNetwork) esend(data);
+  receive(data.data, true);
 };
 
 const listeners = [];
@@ -47,24 +47,24 @@ const update = () =>
     heads: heads(),
   });
 
-const receive = (data) => {
+const receive = (data, dontNetwork) => {
   const messagesFromId = messagesFromIds[data.id];
   if (messagesFromId !== undefined) {
     if (data.head !== messagesFromId.at(-1).head + 1) {
-      update();
+      if (!dontNetwork) update();
     } else {
       messagesFromId.push(data);
     }
   } else {
     if (data.head !== 1) {
-      update();
+      if (!dontNetwork) update();
     } else {
       messagesFromIds[data.id] = [data];
     }
   }
   localStorage.setItem("messagesFromIds", JSON.stringify(messagesFromIds));
   //   messagesEl.innerText = JSON.stringify(messagesFromIds, null, 2);
-  listeners.forEach((f) => f());
+  if (!dontNetwork) listeners.forEach((f) => f());
 };
 
 onConnect(() => {
