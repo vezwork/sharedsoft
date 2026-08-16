@@ -33,7 +33,7 @@ export const send = (message, dontNetwork) => {
     },
   };
   if (!dontNetwork) esend(data);
-  receive(data.data, true);
+  receive(data.data, dontNetwork);
 };
 
 const listeners = [];
