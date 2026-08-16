@@ -24,4 +24,3 @@
 - decouple payer from the "I am owed" text
 - make expense log better; group by month and make each transaction more
   visually parseable
-- choose a colour or "avatar" for each person, maybe use it in the transactions

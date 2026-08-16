@@ -13,7 +13,56 @@
   }
 </style>
 
-<h1><img src="icon.png" height="40px" style="vertical-align: middle;"> esse-split</h1>
+<div style="display:flex; flex-direction: row; align-items: center; justify-content: space-between;">
+  <h1><img src="icon.png" height="40px" style="vertical-align: middle;"> esse-split</h1>
+  <button command="show-modal" commandfor="profile-dialog" style="background: none; border: none; cursor: pointer;">
+    <img src="whodis.png" height="40px" style="border-radius: 50%;" id="profilePic"></button>
+  <dialog id="profile-dialog">
+    <h3>My profile</h2>
+      <div>
+        I am:
+        <select id="profileEl">
+          <option value="">who dis?</option>
+          <option value="elliot">Elliot</option>
+          <option value="sharon">Sharon</option>
+        </select>
+        <script>
+          profileEl.value = localStorage.getItem('who')
+        </script>
+      </div>
+      <div>
+        My key:
+        <input type="text" id="keyEl" size="40" />
+      </div>
+      <script>
+        console.log(localStorage.getItem('key'))
+        keyEl.value = localStorage.getItem('key')
+        keyEl.addEventListener('change', e => {
+          localStorage.setItem('key', keyEl.value)
+        })
+      </script>
+      <br>
+      <button commandfor="profile-dialog" command="close">Close</button>
+  </dialog>
+  <script>
+    const profileSrc = () => {
+      const profileVal = profileEl.value.toLowerCase();
+      switch (profileVal) {
+        case 'elliot':
+          return 'elliot.png';
+        case 'sharon':
+          return 'sharon.png';
+        default:
+          return 'whodis.png'
+      }
+    }
+    profilePic.src = profileSrc();
+    profileEl.addEventListener('change', e => {
+      localStorage.setItem('who', profileEl.value)
+      profilePic.src = profileSrc();
+    })
+  </script>
+</div>
 
 <div style="display:none; padding: 10px; gap: 5px; margin: 10px;" id="refreshEl">
   <button id="refreshAppBtn">&#x21bb; refresh app</button>
@@ -126,7 +175,6 @@
     1÷<input type="number" value="2" id="splitEl" size="4"> that amount
     <script>
       whoEl.value = localStorage.getItem('who')
-      whoEl.addEventListener('change', e => localStorage.setItem('who', whoEl.value))
     </script>
   </span>
   <button id="addEl">add expense</button>
@@ -317,13 +365,4 @@
 
 <script>
   fetch('https://relay.bonto.run', { mode: "no-cors" })
-</script>
-
-<input type="text" id="keyEl" size="40" />
-<script>
-  console.log(localStorage.getItem('key'))
-  keyEl.value = localStorage.getItem('key')
-  keyEl.addEventListener('change', e => {
-    localStorage.setItem('key', keyEl.value)
-  })
 </script>
