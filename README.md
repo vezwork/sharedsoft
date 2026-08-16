@@ -22,8 +22,6 @@
 - super basic service worker registration for offline support
 - sum things up properly if different currencies are used
 - decouple payer from the "I am owed" text
-- make categories better; at least alphabetize if not make it a searchable text
-  field; maybe with icons
 - make expense log better; group by month and make each transaction more
   visually parseable
 - choose a colour or "avatar" for each person, maybe use it in the transactions
