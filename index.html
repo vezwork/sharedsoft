@@ -15,7 +15,6 @@
 
 TODO:<br>
 - store key so installed app can access it without it being in the url
-- add basic validation
 - make UI reactive (user -> owing, connection state, last sync time)
 - add refresh button
 - wait for reply from `fetch('https://relay.bonto.run')`
@@ -99,6 +98,9 @@ before init'ing connection
     <input type="text" value="0.5" id="splitEl" size="4">× that amount
   </span>
   <button id="addEl">add expense</button>
+  <div
+    style="display:none; flex-direction: column;border:1px solid light-dark(#000, #fff); padding: 10px; gap: 5px; margin: 10px;"
+    id="validationEl"></div>
 </div>
 <div
   style="display:flex; flex-direction: column;border:1px solid light-dark(#000, #fff); padding: 10px; gap: 5px; margin: 10px;"
@@ -139,6 +141,54 @@ before init'ing connection
     ).join('') + oweanceString;
   };
 
+  const isValid = ({ who, amount, currency, category, split, name, date }) => {
+    const issues = [];
+    if (!who) {
+      issues.push('who paid must be specified')
+    }
+    if (amount === null || amount === undefined) {
+      issues.push('expense amount must be specified')
+    }
+    if (amount === 0) {
+      issues.push('amount cannot be 0')
+    }
+    if (amount < 0) {
+      issues.push('amount cannot be negative')
+    }
+    if (!currency) {
+      issues.push('currency must be specified')
+    }
+    if (!category) {
+      issues.push('category must be specified')
+    }
+    if (split === null || split === undefined) {
+      issues.push('split must be specified')
+    }
+    if (split === 0) {
+      issues.push('split cannot be 0')
+    }
+    if (split < 0) {
+      issues.push('split cannot be negative')
+    }
+    if (!name) {
+      issues.push('expense name must be specified')
+    }
+    if (!date) {
+      issues.push('date must be specified')
+    }
+
+    if (issues.length > 0) {
+      validationEl.style.display = 'flex';
+      validationEl.innerHTML = `oops you messed up a bit...<ul>
+    ${issues.map(e => `<li>${e}</li>`).join('')}
+      </ul>`;
+      return false;
+    } else {
+      validationEl.style.display = 'none';
+      return true;
+    }
+  }
+
   // TODO:
   // - nicknames
   // - 
@@ -146,21 +196,26 @@ before init'ing connection
   onEvent(reduce);
 
   addEl.onclick = () => {
-    sendEvent({
-      type: 'add expense',
-      data: {
-        who: whoEl.value,
-        amount: Number(amountEl.value),
-        currency: currencyEl.value,
-        category: categoryEl.value,
-        split: Number(splitEl.value),
-        name: nameEl.value,
-        date: dateEl.value
-      }
-    })
-    amountEl.value = ''
-    nameEl.value = ''
-    splitEl.value = '0.5'
+    const expenseData = {
+      who: whoEl.value?.trim(),
+      amount: Number(amountEl.value?.trim()),
+      currency: currencyEl.value?.trim(),
+      category: categoryEl.value?.trim(),
+      split: Number(splitEl.value?.trim()),
+      name: nameEl.value?.trim(),
+      date: dateEl.value?.trim()
+    };
+
+    if (isValid(expenseData)) {
+      sendEvent({
+        type: 'add expense',
+        data: expenseData
+      })
+      // clear the expense fields
+      amountEl.value = ''
+      nameEl.value = ''
+      splitEl.value = '0.5'
+    }
   }
 </script>
 
