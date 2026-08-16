@@ -28,6 +28,49 @@ before init'ing connection
   <select id="categoryEl">
     <option value="dining out">dining out</option>
     <option value="grocery">grocery</option>
+    <script>
+      const categories = ['Hotel',
+        'Bus/train',
+        'Dining out',
+        'Gifts',
+        'Groceries',
+        'Household supplies',
+        'Childcare',
+        'Gas/fuel',
+        'Food and drink - Other',
+        'Electricity',
+        'Rent',
+        'TV/Phone/Internet',
+        'Payment',
+        'Furniture',
+        'Life - Other',
+        'Entertainment - Other',
+        'Liquor',
+        'Games',
+        'Transportation - Other',
+        'Music',
+        'Home - Other',
+        'Sports',
+        'Car',
+        'Taxi',
+        'Clothing',
+        'Electronics',
+        'Movies',
+        'Plane',
+        'General',
+        'Services',
+        'Bicycle',
+        'Insurance',
+        'Parking',
+        'Maintenance',
+        'Education']
+      for (const category of categories) {
+        const optionEl = document.createElement('option')
+        optionEl.value = category
+        optionEl.innerText = category
+        categoryEl.append(optionEl)
+      }
+    </script>'
   </select>
   <span>
     <select id="whoEl">
