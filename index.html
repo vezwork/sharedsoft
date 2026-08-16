@@ -143,14 +143,15 @@ before init'ing connection
       oweanceString = `<span style="color:LimeGreen">Settled up! :)</span>`;
     } else {
       const iOwe = owing > 0;
-      oweanceString = `I ${iOwe ? "owe" : "am owed"} <span style="color:${iOwe ? 'red' : 'LimeGreen'}">$ ${Math.abs(owing).toFixed(2)}</span>`;
+      oweanceString = `<div>I ${iOwe ? "owe" : "am owed"}: <span style="color:${iOwe ? 'red' : 'LimeGreen'}">$ ${Math.abs(owing).toFixed(2)}</span></div>`;
     }
 
-    messagesEl.innerHTML = state.expenses.reverse().map(({ name, amount, currency, date, split, who }) =>
-      `<div style="border:1px solid light-dark(#000, #fff)">
+    messagesEl.innerHTML = oweanceString +
+      state.expenses.reverse().map(({ name, amount, currency, date, split, who }) =>
+        `<div style="border:1px solid light-dark(#000, #fff)">
         ${who} paid ${amount}${currency} for ${name} on ${date} and is owed ${split}× that amount
         </div>`
-    ).join('') + oweanceString;
+      ).join('')
   };
 
   const isValid = ({ who, amount, currency, category, split, name, date }) => {
