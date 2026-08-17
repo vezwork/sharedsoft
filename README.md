@@ -13,7 +13,6 @@
 
 ## TODO
 
-- store key so installed app can access it without it being in the url
 - make UI reactive (user -> owing, connection state, last sync time)
 - wait for reply from `fetch('https://relay.bonto.run')` before init'ing
   connection

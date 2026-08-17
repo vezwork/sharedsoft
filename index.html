@@ -173,7 +173,7 @@
   id="messagesEl"></div>
 
 <script type="module">
-  import { onEvent, sendEvent, id, manualUpdate } from "./events.js";
+  import { onEvent, sendEvent, id, updateState } from "./events.js";
 
   const profileSrc = () => {
     switch (profileEl.value) {
@@ -189,7 +189,7 @@
   profileEl.addEventListener('change', e => {
     localStorage.setItem('who', profileEl.value)
     profilePic.src = profileSrc();
-    manualUpdate();
+    updateState();
     if (profileEl.value) {
       paidByEl.value = profileEl.value;
     }
@@ -217,11 +217,9 @@
       }
     }
     const owing = {}
-    for (const { amount, split, who, currency } of state.expenses) {
-      owing[currency] = (owing[currency] ?? 0) + amount / split * (who === profileEl.value ? -1 : 1)
+    for (const { amount, who, currency } of state.expenses) {
+      owing[currency] = (owing[currency] ?? 0) + amount * (who === profileEl.value ? -1 : 1)
     }
-
-    console.log(owing)
 
     const isBalanced = Math.abs(Object.values(owing).reduce((acc, cur) => acc + cur, 0)) <= 0.01
 
@@ -243,49 +241,14 @@
     }
 
     messagesEl.innerHTML = oweanceString +
-      state.expenses.reverse().map(({ name, amount, currency, date, split, who }) =>
+      state.expenses.reverse().map(({ name, amount, currency, date, who }) =>
         `<div style="border-bottom:1px solid light-dark(#000, #fff)">
-        ${who} paid ${amount}${currency} for ${name} on ${date} and is owed 1÷${split} that amount
+        ${who} is owed ${amount}${currency} for ${name} on ${date}
         </div>`
       ).join('')
   };
 
-  const isValid = ({ who, amount, currency, category, split, name, date }) => {
-    const issues = [];
-    if (!who) {
-      issues.push('who paid must be specified')
-    }
-    if (amount === null || amount === undefined) {
-      issues.push('expense amount must be specified')
-    }
-    if (amount === 0) {
-      issues.push('amount cannot be 0')
-    }
-    if (amount < 0) {
-      issues.push('amount cannot be negative')
-    }
-    if (!currency) {
-      issues.push('currency must be specified')
-    }
-    if (!category) {
-      issues.push('category must be specified')
-    }
-    if (split === null || split === undefined) {
-      issues.push('split must be specified')
-    }
-    if (split === 0) {
-      issues.push('split cannot be 0')
-    }
-    if (split < 0) {
-      issues.push('split cannot be negative')
-    }
-    if (!name) {
-      issues.push('expense name must be specified')
-    }
-    if (!date) {
-      issues.push('date must be specified')
-    }
-
+  const showValidationIssues = issues => {
     if (issues.length > 0) {
       validationEl.style.display = 'flex';
       validationEl.innerHTML = `oops you messed up a bit...<ul>
@@ -297,6 +260,36 @@
       return true;
     }
   }
+  const validate = ({ who, amount, currency, category, name, date }) => {
+    const issues = [];
+    if (!who) {
+      issues.push('who paid must be specified')
+    }
+    const nAmount = Number(amount)
+    if (nAmount === null || nAmount === undefined) {
+      issues.push('expense amount must be specified')
+    }
+    if (nAmount === 0) {
+      issues.push('amount cannot be 0')
+    }
+    if (nAmount < 0) {
+      issues.push('amount cannot be negative')
+    }
+    if (!currency) {
+      issues.push('currency must be specified')
+    }
+    if (!category) {
+      issues.push('category must be specified')
+    }
+    if (!name) {
+      issues.push('expense name must be specified')
+    }
+    if (!date) {
+      issues.push('date must be specified')
+    }
+
+    return issues
+  }
 
   // TODO:
   // - nicknames
@@ -305,17 +298,22 @@
   onEvent(reduce);
 
   addEl.onclick = () => {
+    const fullAmount = Number(amountEl.value)
+    const split = Number(splitEl.value)
     const expenseData = {
       who: paidByEl.value?.trim(),
-      amount: Number(amountEl.value?.trim()),
+      amount: (fullAmount / split).toFixed(2),
       currency: currencyEl.value?.trim(),
       category: categoryEl.value?.trim(),
-      split: Number(splitEl.value?.trim()),
       name: nameEl.value?.trim(),
-      date: dateEl.value?.trim()
+      date: dateEl.value?.trim(),
+      method: { split: split.toFixed(2), fullAmount: fullAmount.toFixed(2) }
     };
 
-    if (isValid(expenseData)) {
+    const issues = validate(expenseData)
+    if (issues.length > 0) {
+      showValidationIssues(issues)
+    } else {
       sendEvent({
         type: 'add expense',
         data: expenseData
@@ -335,34 +333,66 @@
     csvImportEl.addEventListener("change", async () => {
       if (csvImportEl.files.length === 1) {
         const text = await csvImportEl.files[0].text()
-        const lines = text.split('\n')
-
-        // remove header line
+        const lines = parseCSV(text)
+        // remove headers and total balance lines
         const contentLines = lines.slice(2)
+
         for (const line of contentLines) {
-          const [date, name, category, amount, currency, elAmt, sAmt] = line.split(',')
-          const who = elAmt > 0 ? 'elliot' : 'sharon'
-          const split = Number((amount / (who === 'elliot' ? elAmt : sAmt)).toFixed(2))
+          const [date, name, category, fullAmount, currency, sAmt, elAmt] = line
+          if (name === 'Total balance') continue
+          const who = Number(elAmt) > 0 ? 'elliot' : 'sharon'
+          const amount = who === 'elliot' ? elAmt : sAmt
           const eventData = {
-            who,
-            amount: Number(amount),
-            currency,
-            category,
-            split,
-            name,
-            date,
+            who, amount, currency, category, name, date,
+            method: { fullAmount },
           }
-          if (isValid(eventData)) {
+          const issues = validate(eventData)
+          if (issues.length === 0) {
             sendEvent({
               type: 'add expense',
               data: eventData
             }, true) // true: don't send to server right away!
           } else {
-            console.log('error loading line:', line)
+            console.log('error loading line:', line, issues)
           }
         }
+        updateState()
       }
     });
+  }
+
+  function parseCSV(csvString) {
+    let escaping = false
+    let inString = false
+    const lines = [['']]
+    const appendChar = (char) => {
+      const line = lines[lines.length - 1]
+      line[line.length - 1] += char
+    }
+    for (let i = 0; i < csvString.length; i++) {
+      const char = csvString[i]
+      if (inString) {
+        if (char === '"')
+          if (csvString[i + 1] === '"') {
+            appendChar('"')
+            i++
+          } else
+            inString = false
+        else
+          appendChar(char)
+      } else {
+        if (char === '\r') { }
+        else if (char === '"')
+          inString = true
+        else if (char === '\n')
+          lines.push([''])
+        else if (char === ',')
+          lines.at(-1).push('')
+        else
+          appendChar(char)
+      }
+    }
+    return lines
   }
 </script>
 

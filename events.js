@@ -9,11 +9,7 @@ export const onEvent = (f) => {
   f(sortedMessages);
 };
 
-export const manualUpdate = () => {
-  listeners.forEach(f => f(sortedMessages))
-}
-
-const updateState = () => {
+export const updateState = () => {
   const messages = Object.values(messagesFromIds).flat();
   sortedMessages = messages.sort((a, b) => a.time - b.time);
   listeners.forEach((f) => f(sortedMessages));
