@@ -35,8 +35,14 @@ const importKey = async () => {
   } catch (e) { }
 };
 
+// reference: https://github.com/mathiasbynens/base64/issues/13
 function ab2str(buf) {
-  return String.fromCharCode.apply(null, new Uint8Array(buf));
+  const uint8array = new Uint8Array(buf)
+  let result = ''
+  for (let i = 0; i < uint8array.length; i += 1024) {
+    result += String.fromCharCode.apply(null, uint8array.subarray(i, i + 1024))
+  }
+  return result
 }
 function str2ab(str) {
   var buf = new ArrayBuffer(str.length); // 2 bytes for each char
