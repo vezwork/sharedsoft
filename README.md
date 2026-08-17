@@ -11,7 +11,7 @@
   index.html, manifest.json, and icon.png. Clients require a relay to be running
   in order to share data.
 
-## TODO
+## TODOs
 
 - make UI reactive (user -> owing, connection state, last sync time)
 - wait for reply from `fetch('https://relay.bonto.run')` before init'ing
