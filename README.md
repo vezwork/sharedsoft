@@ -2,6 +2,14 @@
 
 ### Client only
 
+Keyboard shorcut: <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd>
+([.vscode/tasks.json](.vscode/tasks.json)).
+
+Or, run one of the Run and Debug launch configurations
+([.vscode/launch.json](.vscode/launch.json)).
+
+Or in a terminal:
+
 ```sh
 npm run client
 ```
@@ -17,7 +25,8 @@ named `scratch` using the node-localstorage library. Use this if you want an
 easy way to view the expense data on disk, which is otherwise hidden away in
 local storage in the client.
 
-1. From a running client, copy the key, then pass it
+1. From a running client, copy the key, and pass it to the key setup script in
+   place of `<KEY>` or run the task `Setup key for peer`:
 
 ```sh
 KEY=<KEY> npm run peer-key-setup

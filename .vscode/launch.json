@@ -1,0 +1,27 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Run client (integrated browser)",
+            "preLaunchTask": "npm: client",
+            "serverReadyAction": {
+                "pattern": "http://127.0.0.1:([0-9]+)",
+                "action": "openIntegratedBrowser",
+                "uriFormat": "http://127.0.0.1:%s"
+            }
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Run client (default browser)",
+            "preLaunchTask": "npm: client",
+            "serverReadyAction": {
+                "pattern": "http://127.0.0.1:([0-9]+)",
+                "action": "openExternally",
+                "uriFormat": "http://127.0.0.1:%s"
+            }
+        },
+    ]
+}
