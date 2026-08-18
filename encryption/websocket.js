@@ -21,8 +21,9 @@ const getKey = async () => {
       localStorage.getItem("key") ?? window.location.hash.slice("#key=".length);
     localStorage.setItem("key", objectKey);
 
-    return importKey(objectKey);
-  } catch (e) { }
+    return await importKey(objectKey);
+  } catch (e) {
+  }
 };
 
 
