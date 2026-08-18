@@ -6,6 +6,7 @@
   "scripts": {
     "client": "npx http-server",
     "peer": "node -r node-localstorage/register peer.js",
+    "peer-key-setup": "mkdir -p scratch && echo ${KEY:-<ADD_YOUR_KEY>} > scratch/key",
     "relay": "node server.js"
   },
   "type": "module"
