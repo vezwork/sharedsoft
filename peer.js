@@ -1,4 +1,4 @@
-import { send as esend, onReceive as onRec, onConnect } from "./encrypted.js";
+import { send as esend, onReceive as onRec, onConnect } from "./encryption/websocket.js";
 
 const initOrLoad = (key, initValue) => {
   const item = localStorage.getItem(key);

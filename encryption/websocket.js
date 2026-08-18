@@ -1,7 +1,7 @@
 // end-to-end encryption in the browser reference:
 // https://plus.excalidraw.com/blog/end-to-end-encryption
 
-import { importKey, encrypt, decrypt } from "./encryption.js";
+import { importKey, encrypt, decrypt } from "./utils.js";
 
 const createKey = async () => {
   const key = await window.crypto.subtle.generateKey(

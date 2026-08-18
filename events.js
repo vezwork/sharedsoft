@@ -1,5 +1,5 @@
-import { messagesFromIds, onReceive } from "./messaging.js";
-export { send as sendEvent, id } from "./messaging.js";
+import { messagesFromIds, onReceive } from "./peer.js";
+export { send as sendEvent, id } from "./peer.js";
 
 let sortedMessages = [];
 
