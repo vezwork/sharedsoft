@@ -58,6 +58,6 @@ ws.addEventListener("open", (e) => {
 ws.addEventListener("message", async (e) => {
   try {
     const decoded = await decrypt(key, e.data);
+    listeners.forEach((f) => f(decoded));
   } catch (e) { }
-  listeners.forEach((f) => f(decoded));
 });
