@@ -5,7 +5,7 @@
   },
   "scripts": {
     "client": "npx http-server",
-    "peer": "node -r node-localstorage/register messaging.js",
+    "peer": "node -r node-localstorage/register peer.js",
     "relay": "node server.js"
   },
   "type": "module"

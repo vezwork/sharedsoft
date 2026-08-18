@@ -1,5 +1,5 @@
 export const importKey = async (objectKey) => {
-    const key = await window.crypto.subtle.importKey(
+    const key = await crypto.subtle.importKey(
         "jwk",
         {
             k: objectKey,
@@ -45,7 +45,7 @@ export const decrypt = async (key, encrypted) => {
 };
 export const encrypt = async (key, message) => {
     const iv = crypto.getRandomValues(new Uint8Array(12));
-    const aenc = await window.crypto.subtle.encrypt(
+    const aenc = await crypto.subtle.encrypt(
         { name: "AES-GCM", iv },
         key,
         new TextEncoder().encode(JSON.stringify(message))
