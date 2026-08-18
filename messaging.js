@@ -87,11 +87,18 @@ onRec((message) => {
     const myHeads = heads();
     objectValueMap(myHeads, (myHead, id) => {
       if (message.heads[id] === undefined || myHead > message.heads[id]) {
-        esend({
-          type: "updateResponse",
-          id,
-          messages: messagesFromIds[id].slice(message.heads[id]),
-        });
+        const messagesNeeded = messagesFromIds[id].slice(message.heads[id])
+        // break up messages into chunks so the update isn't too huge
+        for (let i = 0; i < messagesNeeded.length; i += 10) {
+          setTimeout(() =>
+            esend({
+              type: "updateResponse",
+              id,
+              messages: messagesNeeded.slice(i, i + 10),
+            }),
+            i * 20
+          )
+        }
       }
       if (myHeads[id] === undefined || message.heads[id] > myHead) {
         esend({
