@@ -17,7 +17,7 @@ const createKey = async () => {
 const getKey = async () => {
   try {
     const objectKey = localStorage.getItem("key");
-    return importKey(objectKey);
+    return await importKey(objectKey);
   } catch (e) { }
 };
 
