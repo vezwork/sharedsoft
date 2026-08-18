@@ -10,27 +10,15 @@ const createKey = async () => {
     ["encrypt", "decrypt"]
   );
   const objectKey = (await crypto.subtle.exportKey("jwk", key)).k;
-
-  // TODO: location is not available when running `npm run peer` so we shouldn't even get here
-  // this sets the hash param in the url after the key is created, but this is irrelevant and not possible when running the script directly
-  // so remove it
-  // location.hash = `key=${objectKey}`;
   localStorage.setItem("key", objectKey);
   return { key, objectKey };
 };
 
 const getKey = async () => {
   try {
-    // TODO: remove the #key= altogether since you can set it in the ui
-    const objectKey =
-      localStorage.getItem("key") ?? location.hash.slice("#key=".length);
-
-    // TODO: this is only useful for location.hash.slice("#key=".length) and doesn't need to happen for local storage get key
-    localStorage.setItem("key", objectKey);
-
-    return await importKey(objectKey);
-  } catch (e) {
-  }
+    const objectKey = localStorage.getItem("key");
+    return importKey(objectKey);
+  } catch (e) { }
 };
 
 
