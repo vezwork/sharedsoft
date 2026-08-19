@@ -10,6 +10,13 @@
   html,
   body {
     font-family: system-ui;
+    font-size: 20px;
+  }
+
+  input,
+  select {
+    border-radius: 5px;
+    height: 40px;
   }
 </style>
 
@@ -41,6 +48,17 @@
           localStorage.setItem('key', keyEl.value)
         })
       </script>
+      <br>
+      <button id="cleardataEl">DANGER: delete data</button>
+      <script>
+        cleardataEl.addEventListener('click', e => {
+          if (confirm('are you sure you want to delete ALL data?')) {
+            localStorage.clear()
+            location.reload();
+          }
+        })
+      </script>
+      <br><br>
       <br>
       <button commandfor="profile-dialog" command="close">Close</button>
   </dialog>
