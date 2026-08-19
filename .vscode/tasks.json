@@ -1,0 +1,47 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "npm: client",
+			"detail": "npx http-server",
+			"type": "npm",
+			"script": "client",
+			"isBackground": true,
+			"problemMatcher": {
+				"pattern": {
+					"regexp": "^.*$"
+				},
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": "Available on:",
+					"endsPattern": "http://127.0.0.1:[0-9]+"
+				}
+			},
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"label": "Setup key for peer",
+			"detail": "Adds the key to scratch/key",
+			"type": "shell",
+			"command": "KEY=${input:key} npm run peer-key-setup",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		}
+	],
+	"inputs": [
+		{
+			"id": "key",
+			"description": "Enter your key:",
+			"type": "promptString"
+		}
+	],
+}
